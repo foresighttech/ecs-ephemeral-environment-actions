@@ -1,0 +1,58 @@
+name: 'Terraform Ephemeral Environment Action'
+description: 'Create and destroy terraform infrastructure'
+inputs:
+  terraform-command:
+    description: 'apply / destroy / plan, etc.'
+    required: true
+    default: apply
+  ephemeral-environment-name:
+    description: 'name of ephemeral environment. Should be unique in bakcend-bucket s3 path. Used as s3 key for ephemeral environment updates'
+    required: true
+    default: 'development'
+  git-public-key:
+    description: 'Public key to use to access git repository'
+    required: true
+  git-private-key:
+    description: 'Private key to use to access git repository'
+    required: true
+  git-uri:
+    description: 'Location of git repository to clone'
+    required: true
+  terraform-working-directory:
+    description: 'Location of terraform to execute within remote repository'
+    required: false
+    default: '.'
+  additional-init-args:
+    description: 'This action will call terraform init with provided init args. Should be used to specify a backend'
+    required: true
+    default: |
+      -backend-config=bucket=${BACKEND_BUCKET} \
+      -backend-config=dynamodb_table=${BACKEND_TABLE} \
+      -backend-config=key=ephemeral-environments/${EPHEMERAL_ENVIRONMENT_NAME}.tfstate
+  additional-apply-args:
+    description: 'This action will call terraform init with provided init args. Should be used to specify a backend'
+    required: true
+    default: |
+      -var=task_definition='${TASK_DEFINITION}' \
+      -var=desired_count=${DESIRED_COUNT} \
+      -var=domain_name=${DOMAIN_NAME} \
+      -var=service_port=${SERVICE_PORT} \
+      
+outputs:
+  time: # id of output
+    description: 'The time we greeted you'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  environment:
+    TERRAFORM_COMMAND: ${{ inputs.terraform-command }}
+    EPHEMERAL_ENVIRONMENT_NAME: ${{ inputs.ephemeral-environment-name }}
+    TERRAFORM_WORKING_DIRECTORY: ${{ inputs.terraform-working-directory }}
+    ADDITIONAL_TERRAFORM_APPLY_ARGS: ${{ inputs.additional-apply-args }}
+    ADDITIONAL_TERRAFORM_INIT_ARGS: ${{ inputs.additional-init-args }}
+  args:
+    TERRAFORM_REPO_PUBLIC_KEY: ${{ inputs.git-public-key }}
+    TERRAFORM_REPO_PRIVATE_KEY: ${{ inputs.git-private-key }}
+    TERRAFORM_REPO_GIT_URI: ${{ inputs.git-uri }}
+
+    

@@ -1,0 +1,128 @@
+{
+    "taskDefinition": {
+        "taskDefinitionArn": "arn:aws:ecs:us-east-1:408527110522:task-definition/nw-app-dev:81",
+        "containerDefinitions": [
+            {
+                "name": "nw-app",
+                "image": "884890157659.dkr.ecr.us-east-1.amazonaws.com/nw-app:v0.1.94-new-dev",
+                "cpu": 0,
+                "portMappings": [
+                    {
+                        "containerPort": 3000,
+                        "hostPort": 3000,
+                        "protocol": "tcp"
+                    }
+                ],
+                "essential": true,
+                "environment": [
+                    {
+                        "name": "STAGE",
+                        "value": "dev"
+                    },
+                    {
+                        "name": "REACT_APP_STAGE",
+                        "value": "dev"
+                    }
+                ],
+                "mountPoints": [],
+                "volumesFrom": [],
+                "logConfiguration": {
+                    "logDriver": "awsfirelens",
+                    "options": {
+                        "Name": "firehose",
+                        "delivery_stream": "nw-app-logstream-dev",
+                        "region": "us-east-1",
+                        "role_arn": "arn:aws:iam::689305174806:role/nw-app-dev-firehose_access",
+                        "time_key": "timestamp",
+                        "time_key_format": "%Y-%m-%dT%H:%M:%S.%L"
+                    }
+                }
+            },
+            {
+                "name": "log_router",
+                "image": "public.ecr.aws/aws-observability/aws-for-fluent-bit:latest",
+                "cpu": 0,
+                "memoryReservation": 50,
+                "portMappings": [],
+                "essential": true,
+                "environment": [],
+                "mountPoints": [],
+                "volumesFrom": [],
+                "user": "0",
+                "logConfiguration": {
+                    "logDriver": "awslogs",
+                    "options": {
+                        "awslogs-create-group": "true",
+                        "awslogs-group": "nw-app-dev",
+                        "awslogs-region": "us-east-1",
+                        "awslogs-stream-prefix": "firelens-falink-dev"
+                    }
+                },
+                "firelensConfiguration": {
+                    "type": "fluentbit"
+                }
+            }
+        ],
+        "family": "nw-app-dev",
+        "taskRoleArn": "arn:aws:iam::408527110522:role/task-dev-nw-app",
+        "executionRoleArn": "arn:aws:iam::408527110522:role/ecs-agent-dev-nw-app",
+        "networkMode": "awsvpc",
+        "revision": 81,
+        "volumes": [],
+        "status": "ACTIVE",
+        "requiresAttributes": [
+            {
+                "name": "ecs.capability.execution-role-awslogs"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.ecr-auth"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.17"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.logging-driver.awsfirelens"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.task-iam-role"
+            },
+            {
+                "name": "ecs.capability.execution-role-ecr-pull"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+            },
+            {
+                "name": "ecs.capability.task-eni"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+            },
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+            },
+            {
+                "name": "ecs.capability.firelens.fluentbit"
+            }
+        ],
+        "placementConstraints": [],
+        "compatibilities": [
+            "EC2",
+            "FARGATE"
+        ],
+        "requiresCompatibilities": [
+            "EC2",
+            "FARGATE"
+        ],
+        "cpu": "1024",
+        "memory": "4096",
+        "registeredAt": "2022-03-23T07:28:55.196000-04:00",
+        "registeredBy": "arn:aws:sts::408527110522:assumed-role/nw-app-github/dev-deploy"
+    }
+}
